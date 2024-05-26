@@ -1,25 +1,46 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 import { plaidClient } from '@/lib/plaid/client';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
-    const cookieStore = cookies();
+    const supabase = createClient();
 
-    const access_token = cookieStore.get('access_token');
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!access_token?.value) throw new Error('No access token found');
+    if (authError ?? !user) throw new Error('User not authenticated');
+
+    const { data: accessToken, error: accessTokenError } = await supabase
+      .from('user_tokens')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (accessTokenError ?? !accessToken?.token)
+      throw new Error('No access token found');
 
     const accounts_response = await plaidClient.accountsGet({
-      access_token: access_token.value,
+      access_token: accessToken.token,
     });
+
+    const transactions = await plaidClient.transactionsGet({
+      access_token: accessToken.token,
+      start_date: '2024-01-01',
+      end_date: '2024-05-03',
+    });
+
+    console.log(JSON.stringify(transactions.data.transactions[0], null, 2));
 
     if (accounts_response.data.accounts.length > 0)
       return NextResponse.json({ result: true });
 
     throw new Error('No cookies found');
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ result: false });
   }
 }

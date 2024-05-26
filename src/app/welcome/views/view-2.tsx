@@ -1,5 +1,4 @@
 import { ChevronRight } from 'lucide-react';
-import { redirect } from 'next/navigation';
 import React from 'react';
 
 import { createClient } from '@/lib/supabase/server';
@@ -8,8 +7,8 @@ import incrementProgress from './action/action';
 
 async function View2() {
   const supabase = createClient();
-  const { data, error } = await supabase.auth.getUser();
-  
+  const { data } = await supabase.auth.getUser();
+
   const isEmailVerified = data?.user?.email_confirmed_at;
 
   return (

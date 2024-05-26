@@ -1,10 +1,10 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 import React from 'react';
 
-import { plaidClient } from '@/lib/plaid/client';
+import getAccount from '@u/getAccount';
+import syncTransactionsForAccount from '@u/syncTransactionsForAccount';
+
 import { createClient } from '@/lib/supabase/server';
-import type { Account, Database } from '@/lib/supabase/types';
 
 type Props = {
   params: {
@@ -12,87 +12,7 @@ type Props = {
   };
 };
 
-const getAccount = async (
-  id: string,
-  userId: string,
-  supabase: SupabaseClient<Database>,
-): Promise<{ data: Account | null; error: boolean }> => {
-  try {
-    const { data: account } = await supabase
-      .from('accounts')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (
-      !account ||
-      new Date(account?.updated_at ?? 0) < new Date(Date.now() - 60 * 60 * 1000)
-    ) {
-      const { data: accessToken, error: accessTokenError } = await supabase
-        .from('user_tokens')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (accessTokenError) {
-        console.error(accessTokenError);
-        throw new Error('Access token not found');
-      }
-
-      const { data: updatedAccount } = await plaidClient.accountsGet({
-        access_token: accessToken.token,
-      });
-
-      const { data: balancesData } = await plaidClient.accountsBalanceGet({
-        access_token: accessToken.token,
-      });
-
-      const updatedAccountData = updatedAccount.accounts.find(
-        (updatedAccount) => updatedAccount.account_id === id,
-      );
-
-      const balancesDataForAccount = balancesData.accounts.find(
-        (balanceData) => balanceData.account_id === id,
-      );
-
-      if (
-        !updatedAccountData ||
-        !balancesDataForAccount ||
-        updatedAccountData.mask === null ||
-        updatedAccountData.name === null ||
-        updatedAccountData.subtype === null ||
-        updatedAccountData.type === null
-      )
-        throw new Error('Account not found');
-
-      const updateAccountDataAsAccount: Account = {
-        id: id,
-        balance: balancesDataForAccount?.balances.current ?? null,
-        mask: updatedAccountData.mask,
-        name: updatedAccountData.name,
-        subtype: updatedAccountData.subtype,
-        type: updatedAccountData.type,
-        updated_at: new Date().toISOString(),
-        institution: account?.institution ?? null,
-        created_at: account?.created_at ?? new Date().toISOString(),
-        user_id: userId,
-        verification_status: updatedAccountData?.verification_status ?? null,
-      };
-      if (updatedAccountData) {
-        await supabase
-          .from('accounts')
-          .upsert(updateAccountDataAsAccount, { onConflict: 'id' })
-          .eq('account_id', id);
-        return { error: false, data: updateAccountDataAsAccount };
-      }
-    }
-    return { error: false, data: account };
-  } catch {
-    return { error: true, data: null };
-  }
-};
-
-async function Account({ params: { id } }: Props) {
+async function AccountPage({ params: { id } }: Props) {
   const supabase = createClient();
 
   const {
@@ -105,12 +25,47 @@ async function Account({ params: { id } }: Props) {
   }
 
   const { data: account } = await getAccount(id, user.id, supabase);
+  const transactions = await syncTransactionsForAccount(user.id, id, supabase);
 
   return (
     <div>
       Account <pre>{JSON.stringify(account, null, 2)}</pre>
+      <div className="relative overflow-x-auto px-8">
+        <table className="w-full text-sm text-left rtl:text-right text-neutral-500 dark:text-neutral-400 rounded-xl overflow-hidden">
+          <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-700 dark:text-neutral-400">
+            <tr className="bg-neutral-900">
+              <th scope="col" className="px-6 py-3">
+                Name
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Amount
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Date
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.data.map((transaction) => (
+              <tr
+                className="bg-white border-b dark:bg-neutral-800 dark:border-neutral-700"
+                key={transaction.id}
+              >
+                <th
+                  scope="row"
+                  className="px-6 py-4 font-medium text-neutral-900 whitespace-nowrap dark:text-white"
+                >
+                  {transaction.name}
+                </th>
+                <td className="px-6 py-4">{transaction.amount}</td>
+                <td className="px-6 py-4">{transaction.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
 
-export default Account;
+export default AccountPage;

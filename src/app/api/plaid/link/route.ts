@@ -1,5 +1,4 @@
 import moment from 'moment';
-import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { CountryCode, type LinkTokenCreateRequest, Products } from 'plaid';
 
@@ -12,7 +11,7 @@ export async function POST() {
       client_user_id: 'user-abc',
       email_address: 'user@example.com',
     },
-    products: [Products.Transfer, Products.Statements],
+    products: [Products.Transfer, Products.Statements, Products.Transactions],
     client_name: 'Money Transfer App',
     language: 'en',
     country_codes: [CountryCode.Us],

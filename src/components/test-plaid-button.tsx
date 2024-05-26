@@ -3,16 +3,14 @@
 import { Check, ChevronRight, LoaderCircle, Radio, X } from 'lucide-react';
 import React, { startTransition, useState } from 'react';
 
+
+
 import incrementProgress from '@/app/welcome/views/action/action';
 import { cn } from '@/lib/utils';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const testCookies = async () => {
-  const res = await fetch('/api/plaid/test/cookies');
-  const { result } = (await res.json()) as { result: boolean };
 
-  return result;
-};
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const testTransactions = async () => {
   const res = await fetch('/api/plaid/test/transactions');
   const { result } = (await res.json()) as { result: boolean };
@@ -44,25 +42,10 @@ function TestPlaidButton({ setIsSuccess: parentSetIsSuccess }: Props) {
     showLoader && setShowLoader(false);
     showCheck && setShowCheck(false);
     isSuccess && setIsSuccess(false);
+    isError && setIsError(false);
 
     try {
       setIsLoading(true);
-
-      setShowLoader(true);
-      setText('Testing Auth...');
-
-      const test1 = await testCookies();
-      if (!test1) throw new Error('Failed to test cookies');
-
-      await delay(1000);
-
-      setShowLoader(false);
-      setShowCheck(true);
-      setText('Success');
-
-      await delay(2000);
-
-      setShowCheck(false);
       setShowLoader(true);
 
       setText('Testing Plaid...');

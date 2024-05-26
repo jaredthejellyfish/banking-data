@@ -59,6 +59,111 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          account_id: string | null
+          amount: number
+          authorized_date: string | null
+          authorized_datetime: string | null
+          check_number: string | null
+          counterparties: string[] | null
+          created_at: string
+          date: string
+          datetime: string | null
+          id: string
+          iso_currency_code: string | null
+          location: Json | null
+          logo_url: string | null
+          merchant_entity_id: string | null
+          merchant_name: string | null
+          name: string
+          payment_channel: string | null
+          payment_meta: Json | null
+          pending: boolean | null
+          pending_transaction_id: string | null
+          personal_finance_category: Json | null
+          personal_finance_category_icon_url: string | null
+          transaction_code: string | null
+          unofficial_currency_code: string | null
+          updated_at: string
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          authorized_date?: string | null
+          authorized_datetime?: string | null
+          check_number?: string | null
+          counterparties?: string[] | null
+          created_at?: string
+          date: string
+          datetime?: string | null
+          id?: string
+          iso_currency_code?: string | null
+          location?: Json | null
+          logo_url?: string | null
+          merchant_entity_id?: string | null
+          merchant_name?: string | null
+          name: string
+          payment_channel?: string | null
+          payment_meta?: Json | null
+          pending?: boolean | null
+          pending_transaction_id?: string | null
+          personal_finance_category?: Json | null
+          personal_finance_category_icon_url?: string | null
+          transaction_code?: string | null
+          unofficial_currency_code?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          authorized_date?: string | null
+          authorized_datetime?: string | null
+          check_number?: string | null
+          counterparties?: string[] | null
+          created_at?: string
+          date?: string
+          datetime?: string | null
+          id?: string
+          iso_currency_code?: string | null
+          location?: Json | null
+          logo_url?: string | null
+          merchant_entity_id?: string | null
+          merchant_name?: string | null
+          name?: string
+          payment_channel?: string | null
+          payment_meta?: Json | null
+          pending?: boolean | null
+          pending_transaction_id?: string | null
+          personal_finance_category?: Json | null
+          personal_finance_category_icon_url?: string | null
+          transaction_code?: string | null
+          unofficial_currency_code?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_tokens: {
         Row: {
           created_at: string
@@ -88,7 +193,7 @@ export type Database = {
           {
             foreignKeyName: "user_tokens_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
