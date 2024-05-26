@@ -12,10 +12,6 @@ export async function POST(req: NextRequest) {
       metadata: PlaidLinkOnSuccessMetadata;
     };
 
-    console.log('publicToken', publicToken);
-
-    console.log('metadata', metadata);
-
     const supabase = createClient();
 
     const {

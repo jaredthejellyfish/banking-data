@@ -27,14 +27,6 @@ export async function GET() {
       access_token: accessToken.token,
     });
 
-    const transactions = await plaidClient.transactionsGet({
-      access_token: accessToken.token,
-      start_date: '2024-01-01',
-      end_date: '2024-05-03',
-    });
-
-    console.log(JSON.stringify(transactions.data.transactions[0], null, 2));
-
     if (accounts_response.data.accounts.length > 0)
       return NextResponse.json({ result: true });
 
