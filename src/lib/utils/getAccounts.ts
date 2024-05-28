@@ -75,9 +75,14 @@ export default async function getAccounts(
       };
     });
 
+    const updatedUpdatedAt = accountsToUpdate.map((account) => ({
+      ...account,
+      updated_at: new Date().toISOString(),
+    }));
+
     const { error: updateError, data: updatedAccountsFromDB } = await supabase
       .from('accounts')
-      .upsert(accountsToUpdate, { ignoreDuplicates: true })
+      .upsert(updatedUpdatedAt, { ignoreDuplicates: true })
       .select();
 
     if (updateError) {

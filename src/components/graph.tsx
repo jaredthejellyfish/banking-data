@@ -17,14 +17,13 @@ type Props = {
 };
 
 const accessors = {
-  xAccessor: (d) => d.x,
-  yAccessor: (d) => d.y,
+  xAccessor: (d: { x: string; y: number }) => d.x,
+  yAccessor: (d: { x: string; y: number }) => d.y,
 };
 
 function Graph({ data }: Props) {
   data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Initialize cumulative array
   const cumulativeSpend: { x: string; y: number }[] = [];
   let cumulativeSum = 0;
 
@@ -68,14 +67,20 @@ function Graph({ data }: Props) {
             <div>
               <div
                 style={{
-                  color: colorScale(tooltipData.nearestDatum.key),
+                  color: colorScale
+                    ? colorScale(tooltipData?.nearestDatum?.key ?? '')
+                    : '',
                 }}
               >
                 {tooltipData?.nearestDatum?.key}
               </div>
-              {accessors.xAccessor(tooltipData?.nearestDatum?.datum)}
+              {accessors.xAccessor(
+                tooltipData?.nearestDatum?.datum as { x: string; y: number },
+              )}
               {', '}
-              {accessors.yAccessor(tooltipData?.nearestDatum?.datum)}
+              {accessors.yAccessor(
+                tooltipData?.nearestDatum?.datum as { x: string; y: number },
+              )}
             </div>
           )}
         />

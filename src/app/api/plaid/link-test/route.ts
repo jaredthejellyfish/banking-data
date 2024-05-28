@@ -6,7 +6,7 @@ import { env } from '@/env';
 import { plaidClient } from '@/lib/plaid/client';
 import { createClient } from '@/lib/supabase/server';
 
-export async function POST() {
+export async function GET() {
   const supabase = createClient();
 
   const {
@@ -21,7 +21,7 @@ export async function POST() {
       client_user_id: user.id,
       email_address: user.email,
     },
-    products: [Products.Transfer, Products.Transactions],
+    products: [Products.Transfer, Products.Statements, Products.Transactions],
     client_name: 'Money Transfer App',
     language: 'en',
     country_codes: [CountryCode.Us],

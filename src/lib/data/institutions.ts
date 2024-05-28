@@ -1,5 +1,6 @@
 import type { StaticImageData } from 'next/image';
 
+import NavyFederal from '@p/navy-federal-logo.png';
 import USBank from '@p/us-bank-logo.png';
 import WellsFargo from '@p/wells-fargo-logo.svg';
 
@@ -19,6 +20,11 @@ const institutions: Institution[] = [
     name: 'Wells Fargo',
     id: 'ins_127991',
     logo: WellsFargo as StaticImageData,
+  },
+  {
+    name: 'Navy Federal Credit Union',
+    id: 'ins_15',
+    logo: NavyFederal,
   },
 ];
 

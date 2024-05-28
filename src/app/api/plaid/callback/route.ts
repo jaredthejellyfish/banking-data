@@ -53,9 +53,17 @@ export async function POST(req: NextRequest) {
       throw new Error('Error upserting user token');
     }
 
+    const { data: balancesData } = await plaidClient.accountsBalanceGet({
+      access_token: data.access_token,
+    });
+
     const accounts = metadata.accounts.map((account) => ({
       id: account.id,
       user_id: user.id,
+      balance:
+        balancesData.accounts.find(
+          (balanceData) => balanceData.account_id === account.id,
+        )?.balances.current ?? null,
       name: account.name,
       mask: account.mask,
       type: account.type,

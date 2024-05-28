@@ -1,3 +1,4 @@
+import { format, formatDistanceToNow } from 'date-fns';
 import { redirect } from 'next/navigation';
 import React from 'react';
 
@@ -8,6 +9,7 @@ import Accounts from '@/components/accounts';
 import Graph from '@/components/graph';
 import { createClient } from '@/lib/supabase/server';
 import type { Transaction } from '@/lib/supabase/types';
+import { cn } from '@/lib/utils';
 
 function getGreeting() {
   const now = new Date();
@@ -23,6 +25,13 @@ function getGreeting() {
   }
 
   return greeting;
+}
+
+function formatAmount(amount: number) {
+  const greaterThanZero = amount > 0;
+  const amountWithoutSign = greaterThanZero ? amount : -amount;
+
+  return `${greaterThanZero ? '+' : '-'} $${amountWithoutSign.toFixed(2)}`;
 }
 
 const transactionsForGraph = (transactions: Transaction[]) => {
@@ -84,8 +93,23 @@ async function DashboardPage() {
                 >
                   {transaction.name}
                 </th>
-                <td className="px-6 py-4">{transaction.amount}</td>
-                <td className="px-6 py-4">{transaction.date}</td>
+                <td
+                  className={cn(
+                    'px-6 py-4',
+                    transaction.amount < 0 ? 'text-red-500' : 'text-green-500',
+                  )}
+                >
+                  {formatAmount(transaction.amount)}
+                </td>
+                <td className="px-6 py-4">
+                  {new Date(transaction.date) <
+                  new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    ? format(new Date(transaction.date), 'MMM d, yyyy')
+                    : formatDistanceToNow(new Date(transaction.date), {
+                        addSuffix: true,
+                        includeSeconds: true,
+                      })}
+                </td>
               </tr>
             ))}
           </tbody>

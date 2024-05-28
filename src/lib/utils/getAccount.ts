@@ -70,9 +70,13 @@ export default async function getAccount(
         verification_status: updatedAccountData?.verification_status ?? null,
       };
       if (updatedAccountData) {
+        const updatedUpdateddAt = {
+          ...updateAccountDataAsAccount,
+          updated_at: new Date().toISOString(),
+        };
         await supabase
           .from('accounts')
-          .upsert(updateAccountDataAsAccount, { onConflict: 'id' })
+          .upsert(updatedUpdateddAt, { onConflict: 'id' })
           .eq('account_id', id);
         return { error: false, data: updateAccountDataAsAccount };
       }
