@@ -1,5 +1,6 @@
 'use client';
 
+import { curveCardinal, curveLinear, curveStep } from '@visx/curve';
 import {
   AnimatedAxis, // any of these can be non-animated equivalents
   AnimatedGrid,
@@ -7,6 +8,7 @@ import {
   Tooltip,
   XYChart,
 } from '@visx/xychart';
+import { format } from 'date-fns';
 import React from 'react';
 
 type Props = {
@@ -20,6 +22,10 @@ const accessors = {
   xAccessor: (d: { x: string; y: number }) => d.x,
   yAccessor: (d: { x: string; y: number }) => d.y,
 };
+
+function formatDate(date: string) {
+  return format(new Date(date), 'mm-dd-yy');
+}
 
 function Graph({ data }: Props) {
   data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -50,13 +56,21 @@ function Graph({ data }: Props) {
         xScale={{ type: 'band' }}
         yScale={{ type: 'linear' }}
       >
-        <AnimatedAxis orientation="bottom" />
-        <AnimatedAxis orientation="right" />
+        <AnimatedAxis
+          orientation="bottom"
+          tickFormat={formatDate}
+          tickLabelProps={{ className: 'fill-white' }}
+        />
+        <AnimatedAxis
+          orientation="right"
+          tickLabelProps={{ className: 'fill-white' }}
+        />
         <AnimatedGrid columns={false} numTicks={4} />
         <AnimatedLineSeries
           dataKey="Balance"
           data={cumulativeSpend}
           {...accessors}
+          curve={curveCardinal}
         />
         <Tooltip
           snapTooltipToDatumX

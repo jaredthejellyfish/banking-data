@@ -18,10 +18,10 @@ export async function POST() {
 
   const request: LinkTokenCreateRequest = {
     user: {
-      client_user_id: user.id,
-      email_address: user.email,
+      client_user_id: 'user.id', // "user.id" is a placeholder for the user's ID
+      email_address: 'user.email', // "user.email" is a placeholder for the user's email
     },
-    products: [Products.Transfer, Products.Transactions],
+    products: [Products.Transfer, Products.Statements],
     client_name: 'Money Transfer App',
     language: 'en',
     country_codes: [CountryCode.Us],
@@ -43,6 +43,9 @@ export async function POST() {
     return NextResponse.json({ linkToken });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ linkToken: null });
+    return NextResponse.json({
+      linkToken: null,
+      message: (error as Error).message,
+    });
   }
 }

@@ -2,6 +2,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { redirect } from 'next/navigation';
 import React from 'react';
 
+import formatAmount from '@u/formatAmount';
 import getAccounts from '@u/getAccounts';
 import syncTransactions from '@u/syncTransactions';
 
@@ -25,13 +26,6 @@ function getGreeting() {
   }
 
   return greeting;
-}
-
-function formatAmount(amount: number) {
-  const greaterThanZero = amount > 0;
-  const amountWithoutSign = greaterThanZero ? amount : -amount;
-
-  return `${greaterThanZero ? '+' : '-'} $${amountWithoutSign.toFixed(2)}`;
 }
 
 const transactionsForGraph = (transactions: Transaction[]) => {
@@ -82,36 +76,43 @@ async function DashboardPage() {
             </tr>
           </thead>
           <tbody>
-            {transactions.map((transaction) => (
-              <tr
-                className="bg-white border-b dark:bg-neutral-800 dark:border-neutral-700"
-                key={transaction.id}
-              >
-                <th
-                  scope="row"
-                  className="px-6 py-4 font-medium text-neutral-900 whitespace-nowrap dark:text-white"
+            {transactions
+              .sort(
+                (a, b) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime(),
+              )
+              .map((transaction) => (
+                <tr
+                  className="bg-white border-b dark:bg-neutral-800 dark:border-neutral-700"
+                  key={transaction.id}
                 >
-                  {transaction.name}
-                </th>
-                <td
-                  className={cn(
-                    'px-6 py-4',
-                    transaction.amount < 0 ? 'text-red-500' : 'text-green-500',
-                  )}
-                >
-                  {formatAmount(transaction.amount)}
-                </td>
-                <td className="px-6 py-4">
-                  {new Date(transaction.date) <
-                  new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                    ? format(new Date(transaction.date), 'MMM d, yyyy')
-                    : formatDistanceToNow(new Date(transaction.date), {
-                        addSuffix: true,
-                        includeSeconds: true,
-                      })}
-                </td>
-              </tr>
-            ))}
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium text-neutral-900 whitespace-nowrap dark:text-white"
+                  >
+                    {transaction.name}
+                  </th>
+                  <td
+                    className={cn(
+                      'px-6 py-4',
+                      transaction.amount < 0
+                        ? 'text-red-500'
+                        : 'text-green-500',
+                    )}
+                  >
+                    {formatAmount(transaction.amount)}
+                  </td>
+                  <td className="px-6 py-4">
+                    {new Date(transaction.date) <
+                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                      ? format(new Date(transaction.date), 'MMM d, yyyy')
+                      : formatDistanceToNow(new Date(transaction.date), {
+                          addSuffix: true,
+                          includeSeconds: true,
+                        })}
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
